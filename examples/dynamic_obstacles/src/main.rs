@@ -2,7 +2,7 @@ use saddle_ai_navmesh_example_common as common;
 
 use bevy::prelude::*;
 use common::*;
-use saddle_ai_saddle_ai_navmesh::NavmeshBakeSettings;
+use saddle_ai_navmesh::NavmeshBakeSettings;
 
 #[derive(Component)]
 struct OscillatingObstacle {

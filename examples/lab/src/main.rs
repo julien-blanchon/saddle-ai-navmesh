@@ -3,12 +3,14 @@ mod e2e;
 #[cfg(feature = "e2e")]
 mod scenarios;
 
+#[cfg(not(target_arch = "wasm32"))]
+use bevy::app::ScheduleRunnerPlugin;
+use bevy::prelude::*;
 #[cfg(all(feature = "dev", not(target_arch = "wasm32")))]
 use bevy::remote::{RemotePlugin, http::RemoteHttpPlugin};
-use bevy::{app::ScheduleRunnerPlugin, prelude::*};
 #[cfg(all(feature = "dev", not(target_arch = "wasm32")))]
 use bevy_brp_extras::BrpExtrasPlugin;
-use saddle_ai_saddle_ai_navmesh::{
+use saddle_ai_navmesh::{
     NavmeshAgent, NavmeshArea, NavmeshAreaCost, NavmeshBakeSettings, NavmeshDebugSettings,
     NavmeshFollowTarget, NavmeshPathInvalidated, NavmeshPathResult, NavmeshPlugin,
     NavmeshPrimitive, NavmeshPrimitiveSource, NavmeshQueryFilter, NavmeshSource, NavmeshSourceKind,
@@ -64,16 +66,19 @@ fn main() {
     app.insert_resource(LabDiagnostics::default());
 
     if headless {
-        app.add_plugins(MinimalPlugins.set(ScheduleRunnerPlugin::run_loop(
-            std::time::Duration::from_secs_f64(1.0 / 60.0),
-        )));
-        app.init_resource::<Assets<Mesh>>();
-        app.add_message::<bevy::asset::AssetEvent<Mesh>>();
-        #[cfg(all(feature = "dev", not(target_arch = "wasm32")))]
-        app.add_plugins((
-            RemotePlugin::default(),
-            RemoteHttpPlugin::default().with_port(lab_brp_port()),
-        ));
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            app.add_plugins(MinimalPlugins.set(ScheduleRunnerPlugin::run_loop(
+                std::time::Duration::from_secs_f64(1.0 / 60.0),
+            )));
+            app.init_resource::<Assets<Mesh>>();
+            app.add_message::<bevy::asset::AssetEvent<Mesh>>();
+            #[cfg(feature = "dev")]
+            app.add_plugins((
+                RemotePlugin::default(),
+                RemoteHttpPlugin::default().with_port(lab_brp_port()),
+            ));
+        }
     } else {
         app.add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
@@ -136,8 +141,15 @@ fn lab_brp_port() -> u16 {
 }
 
 fn lab_headless() -> bool {
-    std::env::var("NAVMESH_LAB_HEADLESS")
-        .is_ok_and(|value| value == "1" || value.eq_ignore_ascii_case("true"))
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        std::env::var("NAVMESH_LAB_HEADLESS")
+            .is_ok_and(|value| value == "1" || value.eq_ignore_ascii_case("true"))
+    }
+    #[cfg(target_arch = "wasm32")]
+    {
+        false
+    }
 }
 
 fn setup(

@@ -1,6 +1,6 @@
 use bevy::app::AppExit;
 use bevy::prelude::*;
-use saddle_ai_saddle_ai_navmesh::{
+use saddle_ai_navmesh::{
     NavmeshAgent, NavmeshArea, NavmeshAreaCost, NavmeshBakeSettings, NavmeshDebugSettings,
     NavmeshFollowTarget, NavmeshLinkSource, NavmeshOffMeshLink, NavmeshPlugin, NavmeshPrimitive,
     NavmeshPrimitiveSource, NavmeshQueryFilter, NavmeshSource, NavmeshSourceKind, NavmeshSurface,
@@ -34,6 +34,7 @@ pub fn configure_app(app: &mut App, title: &str) {
     });
     app.add_systems(Update, apply_navmesh_steering);
 
+    #[cfg(not(target_arch = "wasm32"))]
     if let Some(seconds) = std::env::var("NAVMESH_EXAMPLE_EXIT_AFTER_SECONDS")
         .ok()
         .and_then(|value| value.parse::<f32>().ok())

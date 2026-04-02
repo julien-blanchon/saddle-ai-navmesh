@@ -1,7 +1,7 @@
 use std::time::Instant;
 
 use bevy::prelude::*;
-use saddle_ai_saddle_ai_navmesh::{
+use saddle_ai_navmesh::{
     NavmeshArea, NavmeshAreaCost, NavmeshBakeSettings, NavmeshBuildInput, NavmeshPathId,
     NavmeshPathSmoothing, NavmeshPrimitive, NavmeshQueryFilter, NavmeshQuerySettings,
     NavmeshSourceGeometry, NavmeshSourceKind, bake_navmesh,

@@ -481,13 +481,17 @@ fn apply_steering(time: Res<Time>, mut movers: Query<(&mut Transform, &NavmeshSt
 fn update_diagnostics(
     control: Res<LabControl>,
     mut diagnostics: ResMut<LabDiagnostics>,
-    surfaces: Query<(&NavmeshSurfaceStatus, Option<&saddle_ai_navmesh::NavmeshSurfaceData>)>,
+    surfaces: Query<(
+        &NavmeshSurfaceStatus,
+        Option<&saddle_ai_navmesh::NavmeshSurfaceData>,
+    )>,
     smoke: Query<&NavmeshSteeringOutput, With<SmokeAgent>>,
     utility: Query<&NavmeshPathResult, With<UtilityAgent>>,
     wheeled: Query<&NavmeshPathResult, With<WheeledAgent>>,
 ) {
     if let Ok((status, surface_data)) = surfaces.single() {
-        diagnostics.surface_ready = matches!(status.state, saddle_ai_navmesh::NavmeshBakeState::Ready);
+        diagnostics.surface_ready =
+            matches!(status.state, saddle_ai_navmesh::NavmeshBakeState::Ready);
         diagnostics.rebake_generation = status.generation;
 
         if let Some(surface_data) = surface_data {

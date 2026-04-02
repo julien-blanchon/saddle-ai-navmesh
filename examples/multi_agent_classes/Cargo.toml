@@ -1,0 +1,13 @@
+[package]
+name = "saddle-ai-navmesh-example-multi-agent-classes"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+bevy = { workspace = true }
+saddle-ai-navmesh = { workspace = true }
+saddle-ai-navmesh-example-common = { path = "../common" }
+
+[lints]
+workspace = true

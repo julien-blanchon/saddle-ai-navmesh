@@ -544,40 +544,36 @@ pub(crate) fn drive_follow_requests(
 pub(crate) fn update_follow_outputs(
     surfaces: Query<&NavmeshSurfaceStatus>,
     mut agents: ParamSet<(
-        Query<
-            (
-                Entity,
-                &NavmeshAgent,
-                &GlobalTransform,
-                Option<&NavmeshPathResult>,
-                &mut NavmeshFollowerState,
-                &mut NavmeshSteeringOutput,
-                Option<&crate::components::NavmeshCrowdAvoidance>,
-            ),
-        >,
-        Query<
-            (
-                Entity,
-                &NavmeshAgent,
-                &GlobalTransform,
-                Option<&crate::components::NavmeshCrowdAvoidance>,
-                Option<&NavmeshSteeringOutput>,
-            ),
-        >,
+        Query<(
+            Entity,
+            &NavmeshAgent,
+            &GlobalTransform,
+            Option<&NavmeshPathResult>,
+            &mut NavmeshFollowerState,
+            &mut NavmeshSteeringOutput,
+            Option<&crate::components::NavmeshCrowdAvoidance>,
+        )>,
+        Query<(
+            Entity,
+            &NavmeshAgent,
+            &GlobalTransform,
+            Option<&crate::components::NavmeshCrowdAvoidance>,
+            Option<&NavmeshSteeringOutput>,
+        )>,
     )>,
 ) {
     let crowd_snapshots = agents
         .p1()
         .iter()
-        .map(
-            |(entity, agent, transform, crowd, output)| CrowdSnapshot {
-                entity,
-                surface: agent.surface,
-                position: transform.translation(),
-                desired_velocity: output.map(|value| value.desired_velocity).unwrap_or(Vec3::ZERO),
-                body_radius: crowd.map(|crowd| crowd.body_radius).unwrap_or(0.35),
-            },
-        )
+        .map(|(entity, agent, transform, crowd, output)| CrowdSnapshot {
+            entity,
+            surface: agent.surface,
+            position: transform.translation(),
+            desired_velocity: output
+                .map(|value| value.desired_velocity)
+                .unwrap_or(Vec3::ZERO),
+            body_radius: crowd.map(|crowd| crowd.body_radius).unwrap_or(0.35),
+        })
         .collect::<Vec<_>>();
 
     for (entity, agent, transform, path_result, mut state, mut output, crowd_avoidance) in

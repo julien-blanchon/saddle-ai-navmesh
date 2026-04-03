@@ -105,7 +105,8 @@ pub(crate) fn apply_crowd_avoidance(
         let ahead_conflict = ahead_distance > 0.0
             && ahead_distance <= speed * horizon + combined_radius
             && lateral_offset.length() <= combined_radius;
-        let will_collide = overlap_now || closest_offset.length() < combined_radius || ahead_conflict;
+        let will_collide =
+            overlap_now || closest_offset.length() < combined_radius || ahead_conflict;
         if !will_collide {
             continue;
         }

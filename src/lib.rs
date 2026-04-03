@@ -19,8 +19,8 @@ pub use crate::bake::{
 };
 pub use crate::components::{
     NavmeshAgent, NavmeshCrowdAvoidance, NavmeshFollowTarget, NavmeshFollowerState,
-    NavmeshLinkSource, NavmeshPathRequest, NavmeshPathResult, NavmeshSource,
-    NavmeshSteeringOutput, NavmeshSurface, NavmeshSurfaceStatus,
+    NavmeshLinkSource, NavmeshPathRequest, NavmeshPathResult, NavmeshSource, NavmeshSteeringOutput,
+    NavmeshSurface, NavmeshSurfaceStatus,
 };
 pub use crate::config::{
     NavmeshArea, NavmeshAreaCost, NavmeshAreaMask, NavmeshBakeSettings, NavmeshBakeState,

@@ -18,8 +18,9 @@ pub use crate::bake::{
     NavmeshPortal, NavmeshSurfaceData, bake_navmesh,
 };
 pub use crate::components::{
-    NavmeshAgent, NavmeshFollowTarget, NavmeshFollowerState, NavmeshLinkSource, NavmeshPathRequest,
-    NavmeshPathResult, NavmeshSource, NavmeshSteeringOutput, NavmeshSurface, NavmeshSurfaceStatus,
+    NavmeshAgent, NavmeshCrowdAvoidance, NavmeshFollowTarget, NavmeshFollowerState,
+    NavmeshLinkSource, NavmeshPathRequest, NavmeshPathResult, NavmeshSource,
+    NavmeshSteeringOutput, NavmeshSurface, NavmeshSurfaceStatus,
 };
 pub use crate::config::{
     NavmeshArea, NavmeshAreaCost, NavmeshAreaMask, NavmeshBakeSettings, NavmeshBakeState,
@@ -112,6 +113,7 @@ impl Plugin for NavmeshPlugin {
             .register_type::<NavmeshBasisData>()
             .register_type::<NavmeshBakedLink>()
             .register_type::<NavmeshCorridorPortal>()
+            .register_type::<NavmeshCrowdAvoidance>()
             .register_type::<NavmeshDebugSettings>()
             .register_type::<NavmeshDiagnostics>()
             .register_type::<NavmeshFollowTarget>()

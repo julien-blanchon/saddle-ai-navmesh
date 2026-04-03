@@ -14,6 +14,7 @@ pub fn list_scenarios() -> Vec<&'static str> {
         "navmesh_rebake",
         "navmesh_agent_follow",
         "navmesh_multi_class",
+        "navmesh_crowd_follow",
     ]
 }
 
@@ -25,6 +26,7 @@ pub fn scenario_by_name(name: &str) -> Option<Scenario> {
         "navmesh_rebake" => Some(navmesh_rebake()),
         "navmesh_agent_follow" => Some(navmesh_agent_follow()),
         "navmesh_multi_class" => Some(navmesh_multi_class()),
+        "navmesh_crowd_follow" => Some(navmesh_crowd_follow()),
         _ => None,
     }
 }
@@ -173,5 +175,23 @@ fn navmesh_multi_class() -> Scenario {
         .then(Action::Screenshot("multi_class".into()))
         .then(Action::WaitFrames(1))
         .then(assertions::log_summary("navmesh_multi_class"))
+        .build()
+}
+
+fn navmesh_crowd_follow() -> Scenario {
+    Scenario::builder("navmesh_crowd_follow")
+        .description(
+            "Let the three lab agents route together and verify crowd avoidance reports nearby followers while the lead route remains valid.",
+        )
+        .then(wait_until_surface_ready())
+        .then(wait_until_smoke_path())
+        .then(Action::WaitFrames(120))
+        .then(assertions::custom("crowd avoidance observed neighbors", |world| {
+            let diagnostics = world.resource::<LabDiagnostics>();
+            diagnostics.peak_crowd_neighbors > 0 && diagnostics.smoke_path_cost > 0.0
+        }))
+        .then(Action::Screenshot("crowd_follow".into()))
+        .then(Action::WaitFrames(1))
+        .then(assertions::log_summary("navmesh_crowd_follow"))
         .build()
 }

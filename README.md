@@ -8,9 +8,10 @@ The crate owns reusable navigation data, not game AI. It focuses on:
 - explicit surface entities so one world can host multiple navmeshes
 - point projection, path queries, corridor extraction, and funnel smoothing
 - decoupled path following that outputs desired movement instead of moving bodies directly
+- optional lightweight crowd avoidance for navmesh followers before movement is applied
 - async rebake orchestration, dirty-region tracking, and first-class debug drawing
 
-`saddle-ai-navmesh` deliberately keeps locomotion, animation, crowd avoidance, and decision-making outside the crate. Consumers decide how to move an entity once they receive steering output.
+`saddle-ai-navmesh` deliberately keeps locomotion, animation, and higher-level decision-making outside the crate. Consumers decide how to move an entity once they receive steering output, but the crate can now optionally deflect nearby followers away from each other before that intent is applied.
 
 For apps where navigation should remain live for the whole app lifetime, prefer `NavmeshPlugin::always_on(Update)`. Use `NavmeshPlugin::new(...)` when activation should follow explicit schedules such as `OnEnter` and `OnExit`.
 
@@ -119,7 +120,8 @@ fn setup(
   `NavmeshPathRequest`, `NavmeshPathResult`, `NavmeshQueryFilter`,
   `NavmeshQuerySettings`, `NavmeshPathStatus`, `NavmeshPathQueryResult`
 - Following:
-  `NavmeshAgent`, `NavmeshFollowTarget`, `NavmeshFollowerState`, `NavmeshSteeringOutput`
+  `NavmeshAgent`, `NavmeshFollowTarget`, `NavmeshFollowerState`, `NavmeshSteeringOutput`,
+  `NavmeshCrowdAvoidance`
 - Messages:
   `NavmeshRebuildRequested`, `NavmeshBakeCompleted`, `NavmeshPathReady`,
   `NavmeshPathInvalidated`
@@ -164,35 +166,38 @@ The crate does not move the entity. Consumers should read:
 
 and feed those values into their own movement controller, character motor, or animation logic.
 
+If `NavmeshCrowdAvoidance` is present on the same entity, the follower stage also samples nearby agents and applies a lightweight reciprocal-style sidestep before publishing `desired_velocity`.
+
 ## Examples
 
 | Example | Purpose | Run |
 | --- | --- | --- |
-| `basic` | Minimal bake, projection, and path query | `cargo run -p saddle-ai-navmesh-example-basic` |
-| `dynamic_obstacles` | Source motion, dirty tracking, and rebake flow | `cargo run -p saddle-ai-navmesh-example-dynamic-obstacles` |
-| `multi_agent_classes` | Area masks and weighted traversal classes | `cargo run -p saddle-ai-navmesh-example-multi-agent-classes` |
-| `offmesh_links` | Gap traversal via explicit off-mesh links | `cargo run -p saddle-ai-navmesh-example-offmesh-links` |
-| `procedural_rebake` | Geometry added after startup with explicit rebake | `cargo run -p saddle-ai-navmesh-example-procedural-rebake` |
-| `stress` | Reproducible bake/query throughput timing without a windowed app | `cargo run -p saddle-ai-navmesh-example-stress` |
-| `saddle-ai-navmesh-lab` | Rich crate-local showcase with BRP and E2E hooks | `cargo run -p saddle-ai-navmesh-lab` |
+| `basic` | Minimal bake, projection, and path query | `cargo run --manifest-path examples/Cargo.toml -p saddle-ai-navmesh-example-basic` |
+| `dynamic_obstacles` | Source motion, dirty tracking, and rebake flow | `cargo run --manifest-path examples/Cargo.toml -p saddle-ai-navmesh-example-dynamic-obstacles` |
+| `multi_agent_classes` | Area masks and weighted traversal classes | `cargo run --manifest-path examples/Cargo.toml -p saddle-ai-navmesh-example-multi-agent-classes` |
+| `offmesh_links` | Gap traversal via explicit off-mesh links | `cargo run --manifest-path examples/Cargo.toml -p saddle-ai-navmesh-example-offmesh-links` |
+| `procedural_rebake` | Geometry added after startup with explicit rebake | `cargo run --manifest-path examples/Cargo.toml -p saddle-ai-navmesh-example-procedural-rebake` |
+| `steering_integration` | Navmesh routing feeding steering path following, flocking, and crowd avoidance | `cargo run --manifest-path examples/Cargo.toml -p saddle-ai-navmesh-example-steering-integration` |
+| `stress` | Interactive bake/query throughput dashboard with a live surface preview | `cargo run --manifest-path examples/Cargo.toml -p saddle-ai-navmesh-example-stress` |
+| `saddle-ai-navmesh-lab` | Rich crate-local showcase with BRP and E2E hooks | `cargo run --manifest-path examples/Cargo.toml -p saddle-ai-navmesh-lab` |
 
 ## Crate-Local Lab
 
 `shared/ai/saddle-ai-navmesh/examples/lab` keeps runtime inspection and E2E scenarios inside the shared crate itself.
 
 ```bash
-cargo run -p saddle-ai-navmesh-lab
+cargo run --manifest-path examples/Cargo.toml -p saddle-ai-navmesh-lab
 ```
 
 E2E commands:
 
 ```bash
-cargo run -p saddle-ai-navmesh-lab --features e2e -- smoke_launch
-cargo run -p saddle-ai-navmesh-lab --features e2e -- navmesh_smoke
-cargo run -p saddle-ai-navmesh-lab --features e2e -- navmesh_detour
-cargo run -p saddle-ai-navmesh-lab --features e2e -- navmesh_rebake
-cargo run -p saddle-ai-navmesh-lab --features e2e -- navmesh_agent_follow
-cargo run -p saddle-ai-navmesh-lab --features e2e -- navmesh_multi_class
+cargo run --manifest-path examples/Cargo.toml -p saddle-ai-navmesh-lab --features e2e -- smoke_launch
+cargo run --manifest-path examples/Cargo.toml -p saddle-ai-navmesh-lab --features e2e -- navmesh_smoke
+cargo run --manifest-path examples/Cargo.toml -p saddle-ai-navmesh-lab --features e2e -- navmesh_detour
+cargo run --manifest-path examples/Cargo.toml -p saddle-ai-navmesh-lab --features e2e -- navmesh_rebake
+cargo run --manifest-path examples/Cargo.toml -p saddle-ai-navmesh-lab --features e2e -- navmesh_agent_follow
+cargo run --manifest-path examples/Cargo.toml -p saddle-ai-navmesh-lab --features e2e -- navmesh_multi_class
 ```
 
 ## BRP
@@ -231,7 +236,7 @@ v0.1 intentionally ships a smaller but production-usable slice:
 - dirty regions are tracked, but rebuilds are still full-surface
 - obstacle subtraction is triangle-granularity and works best with navmesh-authored or reasonably tessellated walkable meshes
 - area masks are backed by a `u64`, so `NavmeshArea` values `0..=63` are addressable by masks; larger ids are ignored by mask helpers instead of panicking
-- the follower outputs movement intent only; local avoidance and crowd resolution stay outside the crate
+- the follower outputs movement intent only; the built-in crowd avoidance is lightweight local deflection, not a full ORCA / crowd-simulation stack
 - `NavmeshPathSmoothing::None` follows portal midpoints instead of applying funnel string-pulling
 - the line-of-sight helper is a navmesh shortcut check, not a physics visibility query
 - no binary navmesh serialization format is shipped yet

@@ -11,13 +11,16 @@ use bevy::remote::{RemotePlugin, http::RemoteHttpPlugin};
 #[cfg(all(feature = "dev", not(target_arch = "wasm32")))]
 use bevy_brp_extras::BrpExtrasPlugin;
 use saddle_ai_navmesh::{
-    NavmeshAgent, NavmeshArea, NavmeshAreaCost, NavmeshBakeSettings, NavmeshDebugSettings,
-    NavmeshFollowTarget, NavmeshPathInvalidated, NavmeshPathResult, NavmeshPlugin,
+    NavmeshAgent, NavmeshArea, NavmeshAreaCost, NavmeshBakeSettings, NavmeshCrowdAvoidance,
+    NavmeshDebugSettings, NavmeshFollowTarget, NavmeshPathInvalidated, NavmeshPathResult,
+    NavmeshPlugin,
     NavmeshPrimitive, NavmeshPrimitiveSource, NavmeshQueryFilter, NavmeshSource, NavmeshSourceKind,
     NavmeshSteeringOutput, NavmeshSurface, NavmeshSurfaceStatus,
 };
+use saddle_pane::prelude::*;
 
 const TILE_SIZE: f32 = 2.0;
+#[cfg(all(feature = "dev", not(target_arch = "wasm32")))]
 const DEFAULT_LAB_BRP_PORT: u16 = 15_714;
 const SMOKE_QUERY_START: Vec3 = Vec3::new(-6.0, 0.0, 0.0);
 const SMOKE_QUERY_GOAL: Vec3 = Vec3::new(6.0, 0.0, 0.0);
@@ -38,6 +41,30 @@ struct GateObstacle;
 #[derive(Component)]
 struct GateVisual;
 
+#[derive(Resource, Debug, Clone, Copy, Pane)]
+#[pane(title = "Navmesh Lab", position = "top-right")]
+struct LabPane {
+    #[pane(toggle)]
+    gate_blocked: bool,
+    #[pane(toggle)]
+    draw_surface: bool,
+    #[pane(slider, min = 1.0, max = 8.0, step = 0.1)]
+    agent_speed: f32,
+    #[pane(slider, min = 0.05, max = 1.0, step = 0.01)]
+    arrival_distance: f32,
+}
+
+impl Default for LabPane {
+    fn default() -> Self {
+        Self {
+            gate_blocked: false,
+            draw_surface: true,
+            agent_speed: 3.5,
+            arrival_distance: 0.35,
+        }
+    }
+}
+
 #[derive(Resource, Debug, Clone, Copy, Default)]
 pub struct LabControl {
     pub gate_blocked: bool,
@@ -55,6 +82,7 @@ pub struct LabDiagnostics {
     pub invalidations: u64,
     pub follow_distance: f32,
     pub follow_reached: bool,
+    pub peak_crowd_neighbors: usize,
 }
 
 fn main() {
@@ -64,6 +92,7 @@ fn main() {
     app.insert_resource(ClearColor(Color::srgb(0.08, 0.10, 0.12)));
     app.insert_resource(LabControl::default());
     app.insert_resource(LabDiagnostics::default());
+    app.insert_resource(LabPane::default());
 
     if headless {
         #[cfg(not(target_arch = "wasm32"))]
@@ -97,6 +126,14 @@ fn main() {
         ));
         #[cfg(feature = "e2e")]
         app.add_plugins(e2e::NavmeshLabE2EPlugin);
+        app.add_plugins((
+            bevy_flair::FlairPlugin,
+            bevy_input_focus::InputDispatchPlugin,
+            bevy_ui_widgets::UiWidgetsPlugins,
+            bevy_input_focus::tab_navigation::TabNavigationPlugin,
+            PanePlugin,
+        ))
+        .register_pane::<LabPane>();
     }
 
     app.add_plugins(NavmeshPlugin::default());
@@ -112,6 +149,7 @@ fn main() {
     });
     app.add_systems(Startup, setup);
     app.add_systems(Update, apply_steering);
+    app.add_systems(Update, sync_pane_to_lab);
     app.add_systems(
         Update,
         sync_gate_state.before(saddle_ai_navmesh::NavmeshSystems::DetectChanges),
@@ -133,11 +171,6 @@ fn lab_brp_port() -> u16 {
         .ok()
         .and_then(|value| value.parse::<u16>().ok())
         .unwrap_or(DEFAULT_LAB_BRP_PORT)
-}
-
-#[cfg(any(not(feature = "dev"), target_arch = "wasm32"))]
-fn lab_brp_port() -> u16 {
-    DEFAULT_LAB_BRP_PORT
 }
 
 fn lab_headless() -> bool {
@@ -419,6 +452,7 @@ fn spawn_agent<T: Component>(
         Name::new(name.to_string()),
         marker,
         agent,
+        NavmeshCrowdAvoidance::default(),
         NavmeshFollowTarget::Point(target),
         Mesh3d(meshes.add(Cuboid::new(0.45, 0.45, 0.45))),
         MeshMaterial3d(materials.add(StandardMaterial {
@@ -452,6 +486,7 @@ fn spawn_agent_headless<T: Component>(
         Name::new(name.to_string()),
         marker,
         agent,
+        NavmeshCrowdAvoidance::default(),
         NavmeshFollowTarget::Point(target),
         Transform::from_translation(start + Vec3::Y * 0.25),
         GlobalTransform::default(),
@@ -498,8 +533,8 @@ fn update_diagnostics(
         Option<&saddle_ai_navmesh::NavmeshSurfaceData>,
     )>,
     smoke: Query<&NavmeshSteeringOutput, With<SmokeAgent>>,
-    utility: Query<&NavmeshPathResult, With<UtilityAgent>>,
-    wheeled: Query<&NavmeshPathResult, With<WheeledAgent>>,
+    utility: Query<(&NavmeshPathResult, &NavmeshSteeringOutput), With<UtilityAgent>>,
+    wheeled: Query<(&NavmeshPathResult, &NavmeshSteeringOutput), With<WheeledAgent>>,
 ) {
     if let Ok((status, surface_data)) = surfaces.single() {
         diagnostics.surface_ready =
@@ -529,17 +564,25 @@ fn update_diagnostics(
     if let Ok(steering) = smoke.single() {
         diagnostics.follow_distance = steering.remaining_distance;
         diagnostics.follow_reached = steering.reached_goal;
+        diagnostics.peak_crowd_neighbors =
+            diagnostics.peak_crowd_neighbors.max(steering.crowd_neighbors);
     }
 
-    if let Ok(path_result) = utility.single() {
+    if let Ok((path_result, steering)) = utility.single() {
         if let Some(path) = &path_result.result.path {
             diagnostics.utility_cost = path.total_cost;
         }
+        diagnostics.peak_crowd_neighbors = diagnostics
+            .peak_crowd_neighbors
+            .max(steering.crowd_neighbors);
     }
-    if let Ok(path_result) = wheeled.single() {
+    if let Ok((path_result, steering)) = wheeled.single() {
         if let Some(path) = &path_result.result.path {
             diagnostics.wheeled_cost = path.total_cost;
         }
+        diagnostics.peak_crowd_neighbors = diagnostics
+            .peak_crowd_neighbors
+            .max(steering.crowd_neighbors);
     }
 }
 
@@ -548,6 +591,23 @@ fn track_invalidations(
     mut invalidated: MessageReader<NavmeshPathInvalidated>,
 ) {
     diagnostics.invalidations += invalidated.read().count() as u64;
+}
+
+fn sync_pane_to_lab(
+    pane: Res<LabPane>,
+    mut control: ResMut<LabControl>,
+    mut debug: ResMut<NavmeshDebugSettings>,
+    mut agents: Query<&mut NavmeshAgent>,
+) {
+    if pane.is_changed() {
+        control.gate_blocked = pane.gate_blocked;
+        debug.draw_surface = pane.draw_surface;
+        debug.enabled = true;
+        for mut agent in &mut agents {
+            agent.max_speed = pane.agent_speed;
+            agent.arrival_distance = pane.arrival_distance;
+        }
+    }
 }
 
 pub fn set_gate_blocked(world: &mut World, blocked: bool) {

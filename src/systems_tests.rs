@@ -7,8 +7,9 @@ use super::*;
 use crate::{
     NavmeshPlugin, NavmeshPrimitive, NavmeshPrimitiveSource, NavmeshSourceKind,
     components::{
-        NavmeshAgent, NavmeshFollowTarget, NavmeshFollowerState, NavmeshPathRequest, NavmeshSource,
-        NavmeshSteeringOutput, NavmeshSurface, NavmeshSurfaceStatus,
+        NavmeshAgent, NavmeshCrowdAvoidance, NavmeshFollowTarget, NavmeshFollowerState,
+        NavmeshPathRequest, NavmeshSource, NavmeshSteeringOutput, NavmeshSurface,
+        NavmeshSurfaceStatus,
     },
     config::{NavmeshBakeSettings, NavmeshBakeState},
     path::{NavmeshPathId, NavmeshPathStatus},
@@ -224,4 +225,45 @@ fn path_results_refresh_after_surface_generation_changes() {
     assert_eq!(result.result.generation, 2);
     assert_eq!(state.active_generation, 2);
     assert!(!state.stale_path);
+}
+
+#[test]
+fn crowd_avoidance_deflects_head_on_followers() {
+    let mut app = test_app();
+    let (surface, _) = spawn_surface(&mut app);
+    app.update();
+
+    let left = app
+        .world_mut()
+        .spawn((
+            NavmeshAgent::new(surface).with_max_speed(4.0),
+            NavmeshCrowdAvoidance::default(),
+            NavmeshFollowTarget::Point(Vec3::new(1.5, 0.0, 0.0)),
+            NavmeshFollowerState::default(),
+            NavmeshSteeringOutput::default(),
+            GlobalTransform::from_translation(Vec3::new(-1.5, 0.0, 0.0)),
+        ))
+        .id();
+
+    app.world_mut().spawn((
+        NavmeshAgent::new(surface).with_max_speed(4.0),
+        NavmeshCrowdAvoidance::default(),
+        NavmeshFollowTarget::Point(Vec3::new(-1.5, 0.0, 0.0)),
+        NavmeshFollowerState::default(),
+        NavmeshSteeringOutput::default(),
+        GlobalTransform::from_translation(Vec3::new(1.5, 0.0, 0.0)),
+    ));
+
+    for _ in 0..5 {
+        app.update();
+    }
+
+    let output = app
+        .world()
+        .entity(left)
+        .get::<NavmeshSteeringOutput>()
+        .expect("crowd-avoidance follower should emit steering");
+
+    assert!(output.crowd_neighbors > 0);
+    assert!(output.desired_velocity.z.abs() > 0.05);
 }

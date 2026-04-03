@@ -137,11 +137,12 @@ Then `NavmeshPathSmoothing::Funnel` string-pulls the corridor in the nav basis p
 Followers are intentionally separate from path queries.
 
 ```
-NavmeshAgent + NavmeshFollowTarget
+NavmeshAgent + NavmeshFollowTarget (+ optional NavmeshCrowdAvoidance)
     -> request refresh decision
     -> NavmeshPathRequest
     -> NavmeshPathResult
     -> waypoint advancement
+    -> local crowd deflection
     -> NavmeshSteeringOutput
 ```
 
@@ -151,10 +152,21 @@ The follower:
 - repaths when the target changes enough
 - marks paths stale when the surface generation changes
 - advances waypoints using arrival and overshoot tolerances
+- optionally samples nearby followers and deflects the desired velocity away from predicted short-horizon collisions
 
 The follower does not mutate transforms. It only emits movement intent.
 
 `NavmeshPath.total_length` reports the produced follow polyline length. `NavmeshPath.total_cost` keeps the weighted search estimate so area costs and off-mesh-link multipliers stay visible to diagnostics and higher-level AI.
+
+### Crowd deflection stage
+
+If an agent carries `NavmeshCrowdAvoidance`, the follow stage gathers nearby follower snapshots from the same frame and applies a lightweight reciprocal-style adjustment:
+
+- relative position and velocity predict short-horizon overlap
+- braking reduces forward pressure into imminent conflicts
+- side bias adds a stable lateral escape direction
+
+This stage is intentionally local and cheap. It improves medium-density follow scenes without turning the crate into a full crowd-simulation backend.
 
 ## Async Flow
 

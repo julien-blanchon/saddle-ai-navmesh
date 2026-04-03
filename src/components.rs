@@ -209,6 +209,32 @@ impl NavmeshAgent {
 }
 
 #[derive(Component, Debug, Clone, PartialEq, Reflect)]
+#[reflect(Component)]
+pub struct NavmeshCrowdAvoidance {
+    pub enabled: bool,
+    pub body_radius: f32,
+    pub neighbor_distance: f32,
+    pub time_horizon: f32,
+    pub comfort_distance: f32,
+    pub side_bias: f32,
+    pub max_neighbors: usize,
+}
+
+impl Default for NavmeshCrowdAvoidance {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            body_radius: 0.35,
+            neighbor_distance: 3.6,
+            time_horizon: 1.2,
+            comfort_distance: 0.15,
+            side_bias: 0.1,
+            max_neighbors: 8,
+        }
+    }
+}
+
+#[derive(Component, Debug, Clone, PartialEq, Reflect)]
 pub enum NavmeshFollowTarget {
     Point(Vec3),
     Entity { entity: Entity, offset: Vec3 },
@@ -258,6 +284,7 @@ pub struct NavmeshSteeringOutput {
     pub next_target: Option<Vec3>,
     pub remaining_distance: f32,
     pub reached_goal: bool,
+    pub crowd_neighbors: usize,
     pub path_status: NavmeshPathStatus,
 }
 
@@ -269,6 +296,7 @@ impl Default for NavmeshSteeringOutput {
             next_target: None,
             remaining_distance: 0.0,
             reached_goal: false,
+            crowd_neighbors: 0,
             path_status: NavmeshPathStatus::Pending,
         }
     }

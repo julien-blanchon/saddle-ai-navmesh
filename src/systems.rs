@@ -543,15 +543,46 @@ pub(crate) fn drive_follow_requests(
 
 pub(crate) fn update_follow_outputs(
     surfaces: Query<&NavmeshSurfaceStatus>,
-    mut agents: Query<(
-        &NavmeshAgent,
-        &GlobalTransform,
-        Option<&NavmeshPathResult>,
-        &mut NavmeshFollowerState,
-        &mut NavmeshSteeringOutput,
+    mut agents: ParamSet<(
+        Query<
+            (
+                Entity,
+                &NavmeshAgent,
+                &GlobalTransform,
+                Option<&NavmeshPathResult>,
+                &mut NavmeshFollowerState,
+                &mut NavmeshSteeringOutput,
+                Option<&crate::components::NavmeshCrowdAvoidance>,
+            ),
+        >,
+        Query<
+            (
+                Entity,
+                &NavmeshAgent,
+                &GlobalTransform,
+                Option<&crate::components::NavmeshCrowdAvoidance>,
+                Option<&NavmeshSteeringOutput>,
+            ),
+        >,
     )>,
 ) {
-    for (agent, transform, path_result, mut state, mut output) in &mut agents {
+    let crowd_snapshots = agents
+        .p1()
+        .iter()
+        .map(
+            |(entity, agent, transform, crowd, output)| CrowdSnapshot {
+                entity,
+                surface: agent.surface,
+                position: transform.translation(),
+                desired_velocity: output.map(|value| value.desired_velocity).unwrap_or(Vec3::ZERO),
+                body_radius: crowd.map(|crowd| crowd.body_radius).unwrap_or(0.35),
+            },
+        )
+        .collect::<Vec<_>>();
+
+    for (entity, agent, transform, path_result, mut state, mut output, crowd_avoidance) in
+        &mut agents.p0()
+    {
         *output = NavmeshSteeringOutput::default();
 
         let Some(path_result) = path_result else {
@@ -614,8 +645,28 @@ pub(crate) fn update_follow_outputs(
 
         let to_target = next_target - transform.translation();
         let direction = to_target.normalize_or_zero();
-        output.desired_direction = direction;
-        output.desired_velocity = direction * agent.max_speed;
+        let mut desired_velocity = direction * agent.max_speed;
+        if let Some(crowd_avoidance) = crowd_avoidance {
+            let (adjusted_velocity, crowd_neighbors) = follow::apply_crowd_avoidance(
+                transform.translation(),
+                desired_velocity,
+                crowd_avoidance,
+                crowd_snapshots
+                    .iter()
+                    .filter(|neighbor| {
+                        neighbor.entity != entity && neighbor.surface == agent.surface
+                    })
+                    .map(|neighbor| follow::CrowdNeighbor {
+                        position: neighbor.position,
+                        desired_velocity: neighbor.desired_velocity,
+                        body_radius: neighbor.body_radius,
+                    }),
+            );
+            desired_velocity = adjusted_velocity;
+            output.crowd_neighbors = crowd_neighbors;
+        }
+        output.desired_direction = desired_velocity.normalize_or_zero();
+        output.desired_velocity = desired_velocity;
         output.reached_goal = false;
         state.reached_goal = false;
         state.stale_path = path_result.result.generation != surface_status.generation;
@@ -659,6 +710,15 @@ fn clear_dirty_bounds(status: &mut NavmeshSurfaceStatus) {
     status.has_dirty_bounds = false;
     status.dirty_bounds_min = Vec3::ZERO;
     status.dirty_bounds_max = Vec3::ZERO;
+}
+
+#[derive(Clone, Copy, Debug)]
+struct CrowdSnapshot {
+    entity: Entity,
+    surface: Entity,
+    position: Vec3,
+    desired_velocity: Vec3,
+    body_radius: f32,
 }
 
 fn collect_build_input(

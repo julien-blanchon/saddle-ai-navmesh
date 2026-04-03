@@ -50,6 +50,18 @@
 | `filter` | `NavmeshQueryFilter` | default | Traversal class for this agent. |
 | `query_settings` | `NavmeshQuerySettings` | default | Query behavior for this agent. |
 
+## `NavmeshCrowdAvoidance`
+
+| Field | Type | Default | Meaningful range | Effect |
+| --- | --- | --- | --- | --- |
+| `enabled` | `bool` | `true` | `true/false` | Master toggle for the local crowd-avoidance pass. |
+| `body_radius` | `f32` | `0.35` | `>= 0.0` | Physical footprint used for overlap prediction. |
+| `neighbor_distance` | `f32` | `3.0` | `>= 0.0` | Maximum distance used to gather nearby follower agents. |
+| `time_horizon` | `f32` | `1.0` | `> 0.0` recommended | Prediction window for relative collision checks. |
+| `comfort_distance` | `f32` | `0.1` | `>= 0.0` | Extra spacing added beyond the summed body radii. |
+| `side_bias` | `f32` | `1.0` | `>= 0.0` | Lateral sidestep strength relative to braking. |
+| `max_neighbors` | `usize` | `8` | `>= 1` | Upper bound on crowd neighbors sampled per agent. |
+
 ## `NavmeshDebugSettings`
 
 | Field | Type | Default | Effect |
@@ -68,3 +80,4 @@
 - Dirty bounds are accumulated for metrics and invalidation, but v0.1 still rebakes the full surface.
 - Off-mesh links are snapped to the nearest polygon within their `snap_distance`.
 - Obstacle subtraction is triangle-granularity. If blockers should carve crisp holes, prefer navmesh-authored floor geometry or smaller floor triangles.
+- `NavmeshCrowdAvoidance` is a local follower-side adjustment. It does not change the baked surface or path result; it only bends the published steering intent.

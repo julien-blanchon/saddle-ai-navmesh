@@ -4936,6 +4936,7 @@ name = "saddle-ai-navmesh"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "web-time",
 ]
 
 [[package]]
@@ -5024,6 +5025,7 @@ dependencies = [
  "bevy_ui_widgets",
  "saddle-ai-navmesh",
  "saddle-pane",
+ "web-time",
 ]
 
 [[package]]

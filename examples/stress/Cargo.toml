@@ -12,5 +12,8 @@ bevy_ui_widgets = { workspace = true }
 saddle-pane = { workspace = true }
 saddle-ai-navmesh = { workspace = true }
 
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+web-time = "1"
+
 [lints]
 workspace = true

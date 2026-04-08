@@ -1,4 +1,3 @@
-use bevy::platform::time::Instant;
 use bevy::prelude::*;
 use saddle_ai_navmesh::{
     NavmeshArea, NavmeshAreaCost, NavmeshBuildInput, NavmeshPathId, NavmeshPathSmoothing,
@@ -6,6 +5,11 @@ use saddle_ai_navmesh::{
     NavmeshSourceKind, bake_navmesh,
 };
 use saddle_pane::prelude::*;
+
+#[cfg(not(target_arch = "wasm32"))]
+use std::time::Instant;
+#[cfg(target_arch = "wasm32")]
+use web_time::Instant;
 
 const TILE_SIZE: f32 = 1.6;
 

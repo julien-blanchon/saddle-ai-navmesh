@@ -10,6 +10,9 @@ description = "Reusable Bevy navmesh baking, querying, following, and debug tool
 [dependencies]
 bevy = { version = "0.18", features = ["serialize"] }
 
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+web-time = "1"
+
 [workspace]
 
 [lints.clippy]

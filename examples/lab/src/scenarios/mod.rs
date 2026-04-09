@@ -1,7 +1,10 @@
+mod support;
+
 use bevy::prelude::*;
 use saddle_bevy_e2e::{action::Action, actions::assertions, scenario::Scenario};
 
 use crate::{LabDiagnostics, set_gate_blocked};
+use support::{wait_for_detour_cost_increase, wait_for_follow_reached, wait_for_rebake_generation_increase};
 
 #[derive(Resource, Debug, Clone, Copy, Default)]
 struct BaselineGeneration(pub u64);
@@ -86,14 +89,7 @@ fn navmesh_detour() -> Scenario {
             condition: Box::new(|world| world.resource::<LabDiagnostics>().invalidations > 0),
             max_frames: 180,
         })
-        .then(Action::WaitUntil {
-            label: "detour route ready".into(),
-            condition: Box::new(|world| {
-                let diagnostics = world.resource::<LabDiagnostics>();
-                diagnostics.smoke_detour_cost > diagnostics.smoke_baseline_cost
-            }),
-            max_frames: 180,
-        })
+        .then(wait_for_detour_cost_increase(180))
         .then(assertions::custom("detour increased route cost", |world| {
             let diagnostics = world.resource::<LabDiagnostics>();
             diagnostics.smoke_detour_cost > diagnostics.smoke_baseline_cost
@@ -116,14 +112,7 @@ fn navmesh_rebake() -> Scenario {
             world.insert_resource(BaselineGeneration(generation));
         })))
         .then(set_gate(true))
-        .then(Action::WaitUntil {
-            label: "surface generation increments".into(),
-            condition: Box::new(|world| {
-                let baseline = world.resource::<BaselineGeneration>().0;
-                world.resource::<LabDiagnostics>().rebake_generation > baseline
-            }),
-            max_frames: 180,
-        })
+        .then(wait_for_rebake_generation_increase(180))
         .then(assertions::custom("rebake generation advanced", |world| {
             let baseline = world.resource::<BaselineGeneration>().0;
             let diagnostics = world.resource::<LabDiagnostics>();
@@ -141,11 +130,7 @@ fn navmesh_agent_follow() -> Scenario {
         .then(wait_until_surface_ready())
         .then(wait_until_smoke_path())
         .then(Action::Screenshot("follow_start".into()))
-        .then(Action::WaitUntil {
-            label: "agent reaches goal".into(),
-            condition: Box::new(|world| world.resource::<LabDiagnostics>().follow_reached),
-            max_frames: 420,
-        })
+        .then(wait_for_follow_reached(420))
         .then(assertions::custom("agent follow reached goal", |world| {
             let diagnostics = world.resource::<LabDiagnostics>();
             diagnostics.follow_reached || diagnostics.follow_distance <= 0.5

@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<script>
+			(() => {
+				document.documentElement.classList.add('js');
+				const storageKey = 'docs-theme';
+				const storedTheme = localStorage.getItem(storageKey);
+				const isDark =
+					storedTheme === 'dark' ||
+					(storedTheme !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+				document.documentElement.classList.toggle('dark', isDark);
+				document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+			})();
+		</script>
+		<link href="../../_app/immutable/entry/start.C_TBXZ1W.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/CvT92QTu.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/D6rU7RKI.js" rel="modulepreload">
+		<link href="../../_app/immutable/entry/app.CfpjH0Uo.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/D2PL5qU_.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/DsnmJJEf.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/CGbRUU1n.js" rel="modulepreload">
+		<link href="../../_app/immutable/nodes/0.BK0GB2Ju.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/Boyatc0u.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/BH0u6B60.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/D3udy8KQ.js" rel="modulepreload">
+		<link href="../../_app/immutable/nodes/2.CN3SRCMJ.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/D8cjI7xs.js" rel="modulepreload">
+		<link href="../../_app/immutable/nodes/5.BOp3_yHr.js" rel="modulepreload">
+		<link href="../../_app/immutable/chunks/O7QY0ZL7.js" rel="modulepreload">
+		<!--12qhfyh--><meta name="theme-color" content="#ffffff"/> <link rel="icon" type="image/svg+xml" href="../../favicon.svg"/> <meta name="description" content="Reusable Bevy navmesh baking, querying, following, and debug tooling"/><!----><!--1bpnej--><!--[0--><meta name="description" content="`saddle-ai-navmesh` Architecture documentation"/><!--]--><!----><title>`saddle-ai-navmesh` Architecture - saddle-ai-navmesh</title>
+		<link href="../../_app/immutable/assets/manifest.DAGDUwuc.css" rel="stylesheet">
+		<link href="../../_app/immutable/assets/0.Cu___w4E.css" rel="stylesheet">
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents"><!--[--><!--[0--><!--[--><!--[0--><!--[--><main class="relative h-dvh bg-background text-foreground"><div class="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-border bg-background px-4 py-1.5 lg:hidden"><a href="../../" class="inline-flex items-center gap-1 px-2 py-2 text-sm tracking-tight text-foreground"><span class="font-medium tracking-tight text-foreground">saddle-ai-navmesh</span></a> <button class="-mr-2 inline-flex size-10 items-center justify-center gap-2 rounded-sm text-sm whitespace-nowrap text-foreground transition-colors duration-150 ease-out hover:bg-background-muted lg:hidden" aria-label="Toggle menu"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor" preserveAspectRatio="xMidYMid meet" width="20" height="20" aria-hidden="true"><!--[-1--><!--]--><path d="M4 6H28V8H4z"></path><path d="M4 24H28V26H4z"></path><path d="M4 12H28V14H4z"></path><path d="M4 18H28V20H4z"></path></svg><!----></button></div> <!--[-1--><!--]--><!----> <div class="flex h-full w-full min-w-0 lg:grid lg:grid-cols-[22rem_minmax(0,1fr)] lg:pr-4 xl:grid-cols-[22rem_minmax(0,56rem)_18rem] xl:justify-center"><div class="hidden lg:block"><aside class="flex h-dvh flex-col bg-background" aria-label="Documentation sidebar"><div class="flex flex-col gap-4 p-4"><a href="../../" class="flex items-center gap-2"><span class="text-xl font-medium tracking-tight text-foreground">saddle-ai-navmesh</span></a> <!--[0--><button type="button" class="group inset-shadow relative flex h-9 w-full items-center gap-2 rounded-sm bg-background-inset px-3 py-1.5 text-sm font-medium text-foreground-muted/70 transition-[color] duration-150 ease-out hover:text-foreground-muted"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor" preserveAspectRatio="xMidYMid meet" width="16" height="16" aria-hidden="true" class="text-foreground-muted/70"><!--[-1--><!--]--><path d="M29,27.5859l-7.5521-7.5521a11.0177,11.0177,0,1,0-1.4141,1.4141L27.5859,29ZM4,13a9,9,0,1,1,9,9A9.01,9.01,0,0,1,4,13Z"></path></svg><!----> <span class="flex-1 text-left">Search...</span> <!--[0--><kbd class="card pointer-events-none relative hidden h-5 items-center gap-1 rounded-xs bg-background px-1.5 font-mono text-[10px] font-medium text-foreground-muted/70 select-none sm:flex">⌘ K</kbd><!--]--></button><!--]--><!----></div> <div class="relative flex flex-col overflow-hidden flex-1 svelte-1lcbi17"><div class="scrollbar-hide min-h-0 w-full flex-1 overflow-x-hidden overflow-y-auto p-4 svelte-1lcbi17" style="mask-image: linear-gradient(to bottom, transparent, black 16px, black calc(100% - 16px), transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 16px, black calc(100% - 16px), transparent);"><nav class="flex flex-col space-y-1" aria-label="Documentation pages"><h4 class="mb-2 ml-2 text-xs font-medium tracking-wide text-foreground-muted/70 uppercase">Docs</h4> <!--[--><!--[-1--><a href="../../" class="block rounded-sm px-3 py-1.5 text-sm tracking-normal transition-all duration-150 ease-out text-foreground-muted hover:bg-background-muted hover:text-foreground">Overview</a><!--]--><!--[0--><button class="flex w-full items-center justify-between rounded-sm px-3 py-1.5 text-sm font-medium tracking-normal transition-all duration-150 ease-out hover:bg-background-muted hover:text-foreground text-foreground-muted"><span>Documentation</span> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor" preserveAspectRatio="xMidYMid meet" width="16" height="16" aria-hidden="true" class="size-4 transition-transform duration-150"><!--[-1--><!--]--><path d="M22 16 12 26 10.6 24.6 19.2 16 10.6 7.4 12 6z"></path></svg><!----></button> <!--[-1--><!--]--><!--]--><!--[0--><button class="flex w-full items-center justify-between rounded-sm px-3 py-1.5 text-sm font-medium tracking-normal transition-all duration-150 ease-out hover:bg-background-muted hover:text-foreground text-foreground-muted"><span>Demos</span> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor" preserveAspectRatio="xMidYMid meet" width="16" height="16" aria-hidden="true" class="size-4 transition-transform duration-150"><!--[-1--><!--]--><path d="M22 16 12 26 10.6 24.6 19.2 16 10.6 7.4 12 6z"></path></svg><!----></button> <!--[-1--><!--]--><!--]--><!--]--></nav><!----></div></div><!----> <div class="flex items-center gap-1 p-4"><!--[0--><button type="button" class="group transition-scale inset-shadow relative inline-flex size-7 items-center justify-center rounded-sm bg-background-inset text-foreground duration-150 ease-out active:scale-[0.95]" aria-label="Switch to dark mode"><span class="sr-only">Switch to dark mode</span> <span class="transition-transform duration-150 ease-out"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor" preserveAspectRatio="xMidYMid meet" width="16" height="16" aria-hidden="true"><!--[-1--><!--]--><path d="M16,12a4,4,0,1,1-4,4,4.0045,4.0045,0,0,1,4-4m0-2a6,6,0,1,0,6,6,6,6,0,0,0-6-6Z" transform="translate(0 .005)"></path><path d="M6.854 5.375H8.854V10.333H6.854z" transform="rotate(-45 7.86 7.856)"></path><path d="M2 15.005H7V17.005000000000003H2z"></path><path d="M5.375 23.147H10.333V25.147H5.375z" transform="rotate(-45 7.86 24.149)"></path><path d="M15 25.005H17V30.005H15z"></path><path d="M23.147 21.668H25.147V26.625999999999998H23.147z" transform="rotate(-45 24.152 24.149)"></path><path d="M25 15.005H30V17.005000000000003H25z"></path><path d="M21.668 6.854H26.625999999999998V8.854H21.668z" transform="rotate(-45 24.152 7.856)"></path><path d="M15 2.005H17V7.005H15z"></path></svg><!----></span> <span class="absolute transition-transform duration-150 ease-out scale-0 blur-[2px]"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor" preserveAspectRatio="xMidYMid meet" width="16" height="16" aria-hidden="true"><!--[-1--><!--]--><path d="M13.5025,5.4136A15.0755,15.0755,0,0,0,25.096,23.6082a11.1134,11.1134,0,0,1-7.9749,3.3893c-.1385,0-.2782.0051-.4178,0A11.0944,11.0944,0,0,1,13.5025,5.4136M14.98,3a1.0024,1.0024,0,0,0-.1746.0156A13.0959,13.0959,0,0,0,16.63,28.9973c.1641.006.3282,0,.4909,0a13.0724,13.0724,0,0,0,10.702-5.5556,1.0094,1.0094,0,0,0-.7833-1.5644A13.08,13.08,0,0,1,15.8892,4.38,1.0149,1.0149,0,0,0,14.98,3Z"></path></svg><!----></span></button><!--]--> <!--[0--><a class="group transition-scale inset-shadow relative inline-flex size-7 cursor-pointer items-center justify-center rounded-sm bg-background-inset text-foreground duration-150 ease-out active:scale-[0.95]" href="https://github.com/julien-blanchon/saddle-ai-navmesh" target="_blank" rel="noreferrer" aria-label="Open project repository (opens in a new tab)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor" preserveAspectRatio="xMidYMid meet" width="16" height="16" aria-hidden="true" class="size-4 flex-none"><!--[-1--><!--]--><path fill-rule="evenodd" d="M16,2a14,14,0,0,0-4.43,27.28c.7.13,1-.3,1-.67s0-1.21,0-2.38c-3.89.84-4.71-1.88-4.71-1.88A3.71,3.71,0,0,0,6.24,22.3c-1.27-.86.1-.85.1-.85A2.94,2.94,0,0,1,8.48,22.9a3,3,0,0,0,4.08,1.16,2.93,2.93,0,0,1,.88-1.87c-3.1-.36-6.37-1.56-6.37-6.92a5.4,5.4,0,0,1,1.44-3.76,5,5,0,0,1,.14-3.7s1.17-.38,3.85,1.43a13.3,13.3,0,0,1,7,0c2.67-1.81,3.84-1.43,3.84-1.43a5,5,0,0,1,.14,3.7,5.4,5.4,0,0,1,1.44,3.76c0,5.38-3.27,6.56-6.39,6.91a3.33,3.33,0,0,1,.95,2.59c0,1.87,0,3.38,0,3.84s.25.81,1,.67A14,14,0,0,0,16,2Z"></path></svg><!----></a><!--]--></div></aside><!----></div> <div class="inset-shadow relative mx-auto h-full w-full max-w-4xl min-w-0 overflow-hidden border border-border bg-background-inset pt-12 lg:my-4 lg:max-h-[calc(100dvh-2rem)] lg:overflow-visible lg:rounded-xl lg:pt-0"><div class="relative flex flex-col overflow-hidden mx-auto h-full w-full lg:max-h-[calc(100dvh-2rem)] svelte-1lcbi17"><div id="docs-content-container" class="scrollbar-hide min-h-0 w-full flex-1 overflow-x-hidden overflow-y-auto rounded-lg overscroll-none flex flex-col gap-8 px-4 py-8 lg:px-8 svelte-1lcbi17" style="mask-image: linear-gradient(to bottom, transparent, black 16px, black calc(100% - 16px), transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 16px, black calc(100% - 16px), transparent);"><section class="min-w-0 flex-1 space-y-8"><div class="space-y-4"><!--[-1--><!--]--> <h1 class="scroll-m-20 text-3xl font-medium tracking-tight text-foreground">`saddle-ai-navmesh` Architecture</h1> <!--[0--><p class="max-w-4xl text-base font-normal tracking-normal text-foreground-muted">`saddle-ai-navmesh` Architecture documentation</p><!--]--> <!--[0--><!--[0--><div class="relative z-20 mt-8 flex w-full gap-2 lg:hidden"><!--[0--><div class="inset-shadow w-full rounded-md bg-background-inset p-1.5"><button type="button" aria-live="polite" aria-disabled="false" class="card relative inline-flex h-9 w-full font-medium shrink-0 overflow-hidden items-center justify-center gap-2 rounded-sm bg-background px-4 py-2 text-sm whitespace-nowrap text-foreground transition-[background-color] duration-150 ease-out hover:bg-background-muted disabled:pointer-events-none disabled:opacity-50 has-[>svg]:px-3 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=size-])]:size-4 flex-1"><span class="grid place-items-center" style="grid-template-areas: 'content';"><!----><span class="flex items-center gap-2 font-medium tracking-normal text-foreground will-change-transform" style="grid-area: content;"><!--[-1--><svg role="img" viewBox="0 0 24 24" fill="none" aria-hidden="true" class="size-4 flex-none"><title>Markdown</title><path class="stroke-current" d="M1.212 5.5h21.576c.407 0 .712.317.712.679v11.549a.695.695 0 0 1-.712.677H1.212a.695.695 0 0 1-.712-.678V6.18c0-.362.305-.679.712-.679Z"></path><path class="fill-current" d="M3.03 15.96V7.946h2.425l2.424 2.946 2.424-2.946h2.424v8.014h-2.424v-4.596L7.88 14.31l-2.424-2.946v4.596H3.03Zm15.152 0-3.636-3.89h2.424V7.947h2.424v4.125h2.424l-3.636 3.889Z"></path></svg><!--]--> <span>Copy Markdown</span></span><!----></span></button></div><!--]--> <!--[0--><div class="inset-shadow relative rounded-md bg-background-inset p-1.5"><button id="mobile-doc-actions-menu-trigger" type="button" class="card relative inline-flex h-9 w-full font-medium shrink-0 overflow-hidden items-center justify-center gap-2 rounded-sm bg-background px-4 py-2 text-sm whitespace-nowrap text-foreground transition-[background-color] duration-150 ease-out hover:bg-background-muted disabled:pointer-events-none disabled:opacity-50 has-[>svg]:px-3 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=size-])]:size-4 flex-1 w-auto! px-2.5!" aria-label="More actions" aria-haspopup="menu" aria-controls="mobile-doc-actions-menu" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor" preserveAspectRatio="xMidYMid meet" width="16" height="16" aria-hidden="true" class="size-4"><!--[-1--><!--]--><circle cx="8" cy="16" r="2"></circle><circle cx="16" cy="16" r="2"></circle><circle cx="24" cy="16" r="2"></circle></svg><!----></button> <!--[-1--><!--]--></div><!--]--></div><!--]--><!--]--></div> <hr class="text-border"/> <div><!--[--><article data-doc-content="" class="w-full max-w-4xl"><!----><h2>Runtime Model</h2>
+<p>The crate is split into five layers:</p>
+<ol>
+<li>Geometry ingestion</li>
+<li>Bake pipeline</li>
+<li>Query pipeline</li>
+<li>Follower pipeline</li>
+<li>Debug and diagnostics</li>
+</ol>
+<p>Stateful orchestration lives in ECS. Geometry, corridor, and search logic live in plain Rust.</p>
+<h2>Surface Ownership</h2>
+<p>Each navmesh instance is represented by one entity:</p>
+<ul>
+<li><code>NavmeshSurface</code></li>
+<li><code>NavmeshBakeSettings</code></li>
+<li><code>NavmeshSurfaceStatus</code></li>
+<li><code>NavmeshSurfaceData</code> once a bake succeeds</li>
+</ul>
+<p>Source entities point at a surface entity through <code>NavmeshSource.surface</code>.</p>
+<p>This keeps multiple independent navmeshes cheap to reason about:</p>
+<ul>
+<li>one dungeon floor can bake separately from another</li>
+<li>different scenes can keep their own settings</li>
+<li>a crate-local lab can expose multiple surfaces without global singleton state</li>
+</ul>
+<h2>Bake Pipeline</h2>
+<div class="code-block" data-code="source entities / pure build input
+    -> collect triangles and link inputs
+    -> project to nav basis
+    -> classify walkable triangles by slope
+    -> build obstacle footprints
+    -> cull blocked triangles
+    -> extract adjacency portals
+    -> attach off-mesh links
+    -> publish NavmeshSurfaceData" data-language="text">
+					<div class="shiki-theme-light"><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span>source entities / pure build input</span></span>
+<span class="line"><span>    -> collect triangles and link inputs</span></span>
+<span class="line"><span>    -> project to nav basis</span></span>
+<span class="line"><span>    -> classify walkable triangles by slope</span></span>
+<span class="line"><span>    -> build obstacle footprints</span></span>
+<span class="line"><span>    -> cull blocked triangles</span></span>
+<span class="line"><span>    -> extract adjacency portals</span></span>
+<span class="line"><span>    -> attach off-mesh links</span></span>
+<span class="line"><span>    -> publish NavmeshSurfaceData</span></span></code></pre></div>
+					<div class="shiki-theme-dark"><pre class="shiki github-dark" style="background-color:#24292e;color:#e1e4e8" tabindex="0"><code><span class="line"><span>source entities / pure build input</span></span>
+<span class="line"><span>    -> collect triangles and link inputs</span></span>
+<span class="line"><span>    -> project to nav basis</span></span>
+<span class="line"><span>    -> classify walkable triangles by slope</span></span>
+<span class="line"><span>    -> build obstacle footprints</span></span>
+<span class="line"><span>    -> cull blocked triangles</span></span>
+<span class="line"><span>    -> extract adjacency portals</span></span>
+<span class="line"><span>    -> attach off-mesh links</span></span>
+<span class="line"><span>    -> publish NavmeshSurfaceData</span></span></code></pre></div>
+				</div><h3>Source collection</h3>
+<p>The ECS collector supports:</p>
+<ul>
+<li><code>Mesh3d</code> sources</li>
+<li><code>NavmeshPrimitiveSource</code></li>
+<li>explicit pure <code>NavmeshBuildInput</code> via <code>bake_navmesh</code></li>
+</ul>
+<p>Every collected source is normalized into crate-owned triangle soup plus metadata:</p>
+<ul>
+<li>source id</li>
+<li>source kind</li>
+<li>area id</li>
+<li>traversal mask</li>
+<li>transformed world vertices</li>
+</ul>
+<h3>Walkability filtering</h3>
+<p>Triangles are rejected when:</p>
+<ul>
+<li>their normal is degenerate</li>
+<li>their slope exceeds <code>max_slope_degrees</code></li>
+<li>their centroid falls inside an obstacle footprint or within the configured agent radius of it</li>
+</ul>
+<h3>Portal extraction</h3>
+<p>The bake keeps triangles instead of merging them into larger polygons. That keeps v0.1 simpler while still giving clean corridor extraction:</p>
+<ul>
+<li>shared edges become portals</li>
+<li>portals are stored explicitly for queries and debug drawing</li>
+<li>adjacency is filtered by <code>max_step_height</code></li>
+</ul>
+<h3>Runtime rebuild policy</h3>
+<p>Dirty regions are accumulated per surface, but the actual rebuild policy is:</p>
+<ul>
+<li>debounce source changes for <code>rebuild_debounce_seconds</code></li>
+<li>rebuild the full surface asynchronously</li>
+<li>publish the new surface only when the task completes</li>
+</ul>
+<p>This keeps the runtime predictable and correct while leaving space for future tiled backends.</p>
+<h2>Query Pipeline</h2>
+<div class="code-block" data-code="world-space start/goal
+    -> nearest-point projection
+    -> polygon graph search
+    -> corridor reconstruction
+    -> optional funnel smoothing
+    -> NavmeshPathQueryResult" data-language="text">
+					<div class="shiki-theme-light"><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span>world-space start/goal</span></span>
+<span class="line"><span>    -> nearest-point projection</span></span>
+<span class="line"><span>    -> polygon graph search</span></span>
+<span class="line"><span>    -> corridor reconstruction</span></span>
+<span class="line"><span>    -> optional funnel smoothing</span></span>
+<span class="line"><span>    -> NavmeshPathQueryResult</span></span></code></pre></div>
+					<div class="shiki-theme-dark"><pre class="shiki github-dark" style="background-color:#24292e;color:#e1e4e8" tabindex="0"><code><span class="line"><span>world-space start/goal</span></span>
+<span class="line"><span>    -> nearest-point projection</span></span>
+<span class="line"><span>    -> polygon graph search</span></span>
+<span class="line"><span>    -> corridor reconstruction</span></span>
+<span class="line"><span>    -> optional funnel smoothing</span></span>
+<span class="line"><span>    -> NavmeshPathQueryResult</span></span></code></pre></div>
+				</div><h3>Projection</h3>
+<p>Projection is triangle-based:</p>
+<ul>
+<li>every triangle is considered for nearest point</li>
+<li>filters reject disallowed area masks</li>
+<li>the result includes the winning polygon index and projected point</li>
+</ul>
+<p>If the query settings require on-mesh endpoints, projection failure becomes a terminal status. Otherwise the query can auto-project.</p>
+<h3>Graph search</h3>
+<p>The search graph includes:</p>
+<ul>
+<li>triangle-to-triangle portals</li>
+<li>off-mesh links</li>
+</ul>
+<p>Traversal cost is:</p>
+<ul>
+<li>Euclidean step cost</li>
+<li>multiplied by area-cost overrides from <code>NavmeshQueryFilter</code></li>
+<li>multiplied by link cost for off-mesh links</li>
+</ul>
+<p>If the goal is unreachable and partial paths are allowed, the search returns the best reached node by heuristic distance to the goal.</p>
+<h3>Corridor and funnel</h3>
+<p>The raw result preserves:</p>
+<ul>
+<li>polygon corridor</li>
+<li>portal list</li>
+</ul>
+<p>Then <code>NavmeshPathSmoothing::Funnel</code> string-pulls the corridor in the nav basis plane and lifts the result back onto the surface using the corridor polygons.</p>
+<p><code>NavmeshPathSmoothing::None</code> does not collapse the route to a straight line. It emits a conservative raw corridor polyline through portal midpoints so path-following can still respect blocked space without using funnel smoothing.</p>
+<h2>Follower Pipeline</h2>
+<p>Followers are intentionally separate from path queries.</p>
+<div class="code-block" data-code="NavmeshAgent + NavmeshFollowTarget (+ optional NavmeshCrowdAvoidance)
+    -> request refresh decision
+    -> NavmeshPathRequest
+    -> NavmeshPathResult
+    -> waypoint advancement
+    -> local crowd deflection
+    -> NavmeshSteeringOutput" data-language="text">
+					<div class="shiki-theme-light"><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span>NavmeshAgent + NavmeshFollowTarget (+ optional NavmeshCrowdAvoidance)</span></span>
+<span class="line"><span>    -> request refresh decision</span></span>
+<span class="line"><span>    -> NavmeshPathRequest</span></span>
+<span class="line"><span>    -> NavmeshPathResult</span></span>
+<span class="line"><span>    -> waypoint advancement</span></span>
+<span class="line"><span>    -> local crowd deflection</span></span>
+<span class="line"><span>    -> NavmeshSteeringOutput</span></span></code></pre></div>
+					<div class="shiki-theme-dark"><pre class="shiki github-dark" style="background-color:#24292e;color:#e1e4e8" tabindex="0"><code><span class="line"><span>NavmeshAgent + NavmeshFollowTarget (+ optional NavmeshCrowdAvoidance)</span></span>
+<span class="line"><span>    -> request refresh decision</span></span>
+<span class="line"><span>    -> NavmeshPathRequest</span></span>
+<span class="line"><span>    -> NavmeshPathResult</span></span>
+<span class="line"><span>    -> waypoint advancement</span></span>
+<span class="line"><span>    -> local crowd deflection</span></span>
+<span class="line"><span>    -> NavmeshSteeringOutput</span></span></code></pre></div>
+				</div><p>The follower:</p>
+<ul>
+<li>repaths on interval</li>
+<li>repaths when the target changes enough</li>
+<li>marks paths stale when the surface generation changes</li>
+<li>advances waypoints using arrival and overshoot tolerances</li>
+<li>optionally samples nearby followers and deflects the desired velocity away from predicted short-horizon collisions</li>
+</ul>
+<p>The follower does not mutate transforms. It only emits movement intent.</p>
+<p><code>NavmeshPath.total_length</code> reports the produced follow polyline length. <code>NavmeshPath.total_cost</code> keeps the weighted search estimate so area costs and off-mesh-link multipliers stay visible to diagnostics and higher-level AI.</p>
+<h3>Crowd deflection stage</h3>
+<p>If an agent carries <code>NavmeshCrowdAvoidance</code>, the follow stage gathers nearby follower snapshots from the same frame and applies a lightweight reciprocal-style adjustment:</p>
+<ul>
+<li>relative position and velocity predict short-horizon overlap</li>
+<li>braking reduces forward pressure into imminent conflicts</li>
+<li>side bias adds a stable lateral escape direction</li>
+</ul>
+<p>This stage is intentionally local and cheap. It improves medium-density follow scenes without turning the crate into a full crowd-simulation backend.</p>
+<h2>Async Flow</h2>
+<div class="code-block" data-code="dirty source / explicit rebuild request
+    -> mark surface dirty
+    -> wait for debounce deadline
+    -> spawn async bake task
+    -> poll task in ECS
+    -> update surface component + status + diagnostics" data-language="text">
+					<div class="shiki-theme-light"><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span>dirty source / explicit rebuild request</span></span>
+<span class="line"><span>    -> mark surface dirty</span></span>
+<span class="line"><span>    -> wait for debounce deadline</span></span>
+<span class="line"><span>    -> spawn async bake task</span></span>
+<span class="line"><span>    -> poll task in ECS</span></span>
+<span class="line"><span>    -> update surface component + status + diagnostics</span></span></code></pre></div>
+					<div class="shiki-theme-dark"><pre class="shiki github-dark" style="background-color:#24292e;color:#e1e4e8" tabindex="0"><code><span class="line"><span>dirty source / explicit rebuild request</span></span>
+<span class="line"><span>    -> mark surface dirty</span></span>
+<span class="line"><span>    -> wait for debounce deadline</span></span>
+<span class="line"><span>    -> spawn async bake task</span></span>
+<span class="line"><span>    -> poll task in ECS</span></span>
+<span class="line"><span>    -> update surface component + status + diagnostics</span></span></code></pre></div>
+				</div><p>Bake tasks return a crate-owned output object. ECS applies that output on the main world once the task is ready.</p>
+<h2>System Ordering</h2>
+<p><code>NavmeshSystems</code> are ordered as:</p>
+<ol>
+<li><code>DetectChanges</code></li>
+<li><code>Bake</code></li>
+<li><code>Query</code></li>
+<li><code>Follow</code></li>
+<li><code>Debug</code></li>
+</ol>
+<p>That yields these guarantees:</p>
+<ul>
+<li>requests see the latest completed surface</li>
+<li>followers read query results from the same frame</li>
+<li>debug reflects the final state for the frame</li>
+</ul>
+<h2>Debug Derivation</h2>
+<p>Debug drawing reads live ECS data only:</p>
+<ul>
+<li><code>NavmeshSurfaceData</code> for triangles, portals, and links</li>
+<li><code>NavmeshPathResult</code> for active paths</li>
+<li><code>NavmeshPathRequest</code> for projected start and goal</li>
+<li><code>NavmeshSteeringOutput</code> for follower state</li>
+</ul>
+<p>No shadow debug cache is maintained. <code>NavmeshDebugSettings::surface_depth_bias</code> is forwarded into Bevy&#39;s default gizmo config group so crate users can lift the wireframe in front of scene geometry when inspecting dense levels.</p>
+<h2>Invalidations</h2>
+<p>When a surface becomes dirty or its generation changes:</p>
+<ul>
+<li>existing results are marked pending or stale</li>
+<li><code>NavmeshPathInvalidated</code> is published</li>
+<li>followers request a refresh on their next update</li>
+</ul>
+<p>This keeps query consumers aware of topology churn without forcing the crate to own locomotion rollback or reconciliation.</p>
+<!----></article> <!----><!--]--><!----> <!--[-1--><!--]--><!----></div></section><!----></div></div><!----></div> <aside class="hidden xl:block xl:w-full xl:py-8 xl:pr-4 xl:pl-4" aria-label="Table of contents and document actions"><div class="sticky top-8 flex h-full max-h-[calc(100dvh-4rem)] min-h-0 flex-col"><!--[0--><div class="min-h-0 flex-1"><div class="contents"><!--[-1--><div class="hidden text-sm tracking-normal text-foreground-muted/70 lg:block">No headings</div><!--]--></div><!----></div><!--]--> <!--[0--><!--[0--><div class="mt-auto"><div class="flex flex-col gap-1 text-sm"><!--[0--><button type="button" aria-live="polite" aria-disabled="false" class="group/option flex items-center gap-2 overflow-hidden rounded-sm px-3 py-1.5 text-left font-medium tracking-normal text-foreground-muted transition-colors duration-150 ease-out hover:bg-background-muted hover:text-foreground"><span class="grid" style="grid-template-areas: 'content';"><!----><span class="flex items-center gap-2" style="grid-area: content;"><!--[-1--><svg role="img" viewBox="0 0 24 24" fill="none" aria-hidden="true" class="size-4 flex-none"><title>Markdown</title><path class="stroke-current" d="M1.212 5.5h21.576c.407 0 .712.317.712.679v11.549a.695.695 0 0 1-.712.677H1.212a.695.695 0 0 1-.712-.678V6.18c0-.362.305-.679.712-.679Z"></path><path class="fill-current" d="M3.03 15.96V7.946h2.425l2.424 2.946 2.424-2.946h2.424v8.014h-2.424v-4.596L7.88 14.31l-2.424-2.946v4.596H3.03Zm15.152 0-3.636-3.89h2.424V7.947h2.424v4.125h2.424l-3.636 3.889Z"></path></svg><!--]--> <span>Copy as Markdown</span></span><!----></span></button><!--]--> <!--[0--><a class="group/option flex items-center gap-2 rounded-sm px-3 py-1.5 text-left font-medium tracking-normal text-foreground-muted transition-colors duration-150 ease-out hover:bg-background-muted hover:text-foreground" href="https://github.com/julien-blanchon/saddle-ai-navmesh/blob/main/docs//saddle-ai-navmesh/docs/architecture.md" target="_blank" rel="noreferrer"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor" preserveAspectRatio="xMidYMid meet" width="16" height="16" aria-hidden="true" class="size-4 flex-none"><!--[-1--><!--]--><path fill-rule="evenodd" d="M16,2a14,14,0,0,0-4.43,27.28c.7.13,1-.3,1-.67s0-1.21,0-2.38c-3.89.84-4.71-1.88-4.71-1.88A3.71,3.71,0,0,0,6.24,22.3c-1.27-.86.1-.85.1-.85A2.94,2.94,0,0,1,8.48,22.9a3,3,0,0,0,4.08,1.16,2.93,2.93,0,0,1,.88-1.87c-3.1-.36-6.37-1.56-6.37-6.92a5.4,5.4,0,0,1,1.44-3.76,5,5,0,0,1,.14-3.7s1.17-.38,3.85,1.43a13.3,13.3,0,0,1,7,0c2.67-1.81,3.84-1.43,3.84-1.43a5,5,0,0,1,.14,3.7,5.4,5.4,0,0,1,1.44,3.76c0,5.38-3.27,6.56-6.39,6.91a3.33,3.33,0,0,1,.95,2.59c0,1.87,0,3.38,0,3.84s.25.81,1,.67A14,14,0,0,0,16,2Z"></path></svg><!----> <span>Open in GitHub</span> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor" preserveAspectRatio="xMidYMid meet" width="16" height="16" aria-hidden="true" class="ml-auto size-4 flex-none"><!--[-1--><!--]--><path d="M26,28H6a2.0027,2.0027,0,0,1-2-2V6A2.0027,2.0027,0,0,1,6,4H16V6H6V26H26V16h2V26A2.0027,2.0027,0,0,1,26,28Z"></path><path d="M20 2 20 4 26.586 4 18 12.586 19.414 14 28 5.414 28 12 30 12 30 2 20 2z"></path></svg><!----> <span class="sr-only">(opens in a new tab)</span></a><!--]--> <!--[-1--><!--]--> <!--[-1--><!--]--></div></div><!--]--><!--]--></div></aside></div></main><!--]--><!--]--><!----> <!--[0--><!--[-1--><!--]--><!--]--><!--]--><!--]--> <!--[-1--><!--]--><!--]-->
+			
+			<script>
+				{
+					__sveltekit_m9v8d7 = {
+						base: new URL("../..", location).pathname.slice(0, -1),
+						assets: "/saddle-ai-navmesh"
+					};
+
+					const element = document.currentScript.parentElement;
+
+					Promise.all([
+						import("../../_app/immutable/entry/start.C_TBXZ1W.js"),
+						import("../../_app/immutable/entry/app.CfpjH0Uo.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element, {
+							node_ids: [0, 2, 5],
+							data: [null,null,{type:"data",data:{html:"\u003Ch2>Runtime Model\u003C/h2>\n\u003Cp>The crate is split into five layers:\u003C/p>\n\u003Col>\n\u003Cli>Geometry ingestion\u003C/li>\n\u003Cli>Bake pipeline\u003C/li>\n\u003Cli>Query pipeline\u003C/li>\n\u003Cli>Follower pipeline\u003C/li>\n\u003Cli>Debug and diagnostics\u003C/li>\n\u003C/ol>\n\u003Cp>Stateful orchestration lives in ECS. Geometry, corridor, and search logic live in plain Rust.\u003C/p>\n\u003Ch2>Surface Ownership\u003C/h2>\n\u003Cp>Each navmesh instance is represented by one entity:\u003C/p>\n\u003Cul>\n\u003Cli>\u003Ccode>NavmeshSurface\u003C/code>\u003C/li>\n\u003Cli>\u003Ccode>NavmeshBakeSettings\u003C/code>\u003C/li>\n\u003Cli>\u003Ccode>NavmeshSurfaceStatus\u003C/code>\u003C/li>\n\u003Cli>\u003Ccode>NavmeshSurfaceData\u003C/code> once a bake succeeds\u003C/li>\n\u003C/ul>\n\u003Cp>Source entities point at a surface entity through \u003Ccode>NavmeshSource.surface\u003C/code>.\u003C/p>\n\u003Cp>This keeps multiple independent navmeshes cheap to reason about:\u003C/p>\n\u003Cul>\n\u003Cli>one dungeon floor can bake separately from another\u003C/li>\n\u003Cli>different scenes can keep their own settings\u003C/li>\n\u003Cli>a crate-local lab can expose multiple surfaces without global singleton state\u003C/li>\n\u003C/ul>\n\u003Ch2>Bake Pipeline\u003C/h2>\n\u003Cdiv class=\"code-block\" data-code=\"source entities / pure build input\n    -> collect triangles and link inputs\n    -> project to nav basis\n    -> classify walkable triangles by slope\n    -> build obstacle footprints\n    -> cull blocked triangles\n    -> extract adjacency portals\n    -> attach off-mesh links\n    -> publish NavmeshSurfaceData\" data-language=\"text\">\n\t\t\t\t\t\u003Cdiv class=\"shiki-theme-light\">\u003Cpre class=\"shiki github-light\" style=\"background-color:#fff;color:#24292e\" tabindex=\"0\">\u003Ccode>\u003Cspan class=\"line\">\u003Cspan>source entities / pure build input\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> collect triangles and link inputs\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> project to nav basis\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> classify walkable triangles by slope\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> build obstacle footprints\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> cull blocked triangles\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> extract adjacency portals\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> attach off-mesh links\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> publish NavmeshSurfaceData\u003C/span>\u003C/span>\u003C/code>\u003C/pre>\u003C/div>\n\t\t\t\t\t\u003Cdiv class=\"shiki-theme-dark\">\u003Cpre class=\"shiki github-dark\" style=\"background-color:#24292e;color:#e1e4e8\" tabindex=\"0\">\u003Ccode>\u003Cspan class=\"line\">\u003Cspan>source entities / pure build input\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> collect triangles and link inputs\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> project to nav basis\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> classify walkable triangles by slope\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> build obstacle footprints\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> cull blocked triangles\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> extract adjacency portals\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> attach off-mesh links\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> publish NavmeshSurfaceData\u003C/span>\u003C/span>\u003C/code>\u003C/pre>\u003C/div>\n\t\t\t\t\u003C/div>\u003Ch3>Source collection\u003C/h3>\n\u003Cp>The ECS collector supports:\u003C/p>\n\u003Cul>\n\u003Cli>\u003Ccode>Mesh3d\u003C/code> sources\u003C/li>\n\u003Cli>\u003Ccode>NavmeshPrimitiveSource\u003C/code>\u003C/li>\n\u003Cli>explicit pure \u003Ccode>NavmeshBuildInput\u003C/code> via \u003Ccode>bake_navmesh\u003C/code>\u003C/li>\n\u003C/ul>\n\u003Cp>Every collected source is normalized into crate-owned triangle soup plus metadata:\u003C/p>\n\u003Cul>\n\u003Cli>source id\u003C/li>\n\u003Cli>source kind\u003C/li>\n\u003Cli>area id\u003C/li>\n\u003Cli>traversal mask\u003C/li>\n\u003Cli>transformed world vertices\u003C/li>\n\u003C/ul>\n\u003Ch3>Walkability filtering\u003C/h3>\n\u003Cp>Triangles are rejected when:\u003C/p>\n\u003Cul>\n\u003Cli>their normal is degenerate\u003C/li>\n\u003Cli>their slope exceeds \u003Ccode>max_slope_degrees\u003C/code>\u003C/li>\n\u003Cli>their centroid falls inside an obstacle footprint or within the configured agent radius of it\u003C/li>\n\u003C/ul>\n\u003Ch3>Portal extraction\u003C/h3>\n\u003Cp>The bake keeps triangles instead of merging them into larger polygons. That keeps v0.1 simpler while still giving clean corridor extraction:\u003C/p>\n\u003Cul>\n\u003Cli>shared edges become portals\u003C/li>\n\u003Cli>portals are stored explicitly for queries and debug drawing\u003C/li>\n\u003Cli>adjacency is filtered by \u003Ccode>max_step_height\u003C/code>\u003C/li>\n\u003C/ul>\n\u003Ch3>Runtime rebuild policy\u003C/h3>\n\u003Cp>Dirty regions are accumulated per surface, but the actual rebuild policy is:\u003C/p>\n\u003Cul>\n\u003Cli>debounce source changes for \u003Ccode>rebuild_debounce_seconds\u003C/code>\u003C/li>\n\u003Cli>rebuild the full surface asynchronously\u003C/li>\n\u003Cli>publish the new surface only when the task completes\u003C/li>\n\u003C/ul>\n\u003Cp>This keeps the runtime predictable and correct while leaving space for future tiled backends.\u003C/p>\n\u003Ch2>Query Pipeline\u003C/h2>\n\u003Cdiv class=\"code-block\" data-code=\"world-space start/goal\n    -> nearest-point projection\n    -> polygon graph search\n    -> corridor reconstruction\n    -> optional funnel smoothing\n    -> NavmeshPathQueryResult\" data-language=\"text\">\n\t\t\t\t\t\u003Cdiv class=\"shiki-theme-light\">\u003Cpre class=\"shiki github-light\" style=\"background-color:#fff;color:#24292e\" tabindex=\"0\">\u003Ccode>\u003Cspan class=\"line\">\u003Cspan>world-space start/goal\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> nearest-point projection\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> polygon graph search\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> corridor reconstruction\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> optional funnel smoothing\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> NavmeshPathQueryResult\u003C/span>\u003C/span>\u003C/code>\u003C/pre>\u003C/div>\n\t\t\t\t\t\u003Cdiv class=\"shiki-theme-dark\">\u003Cpre class=\"shiki github-dark\" style=\"background-color:#24292e;color:#e1e4e8\" tabindex=\"0\">\u003Ccode>\u003Cspan class=\"line\">\u003Cspan>world-space start/goal\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> nearest-point projection\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> polygon graph search\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> corridor reconstruction\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> optional funnel smoothing\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> NavmeshPathQueryResult\u003C/span>\u003C/span>\u003C/code>\u003C/pre>\u003C/div>\n\t\t\t\t\u003C/div>\u003Ch3>Projection\u003C/h3>\n\u003Cp>Projection is triangle-based:\u003C/p>\n\u003Cul>\n\u003Cli>every triangle is considered for nearest point\u003C/li>\n\u003Cli>filters reject disallowed area masks\u003C/li>\n\u003Cli>the result includes the winning polygon index and projected point\u003C/li>\n\u003C/ul>\n\u003Cp>If the query settings require on-mesh endpoints, projection failure becomes a terminal status. Otherwise the query can auto-project.\u003C/p>\n\u003Ch3>Graph search\u003C/h3>\n\u003Cp>The search graph includes:\u003C/p>\n\u003Cul>\n\u003Cli>triangle-to-triangle portals\u003C/li>\n\u003Cli>off-mesh links\u003C/li>\n\u003C/ul>\n\u003Cp>Traversal cost is:\u003C/p>\n\u003Cul>\n\u003Cli>Euclidean step cost\u003C/li>\n\u003Cli>multiplied by area-cost overrides from \u003Ccode>NavmeshQueryFilter\u003C/code>\u003C/li>\n\u003Cli>multiplied by link cost for off-mesh links\u003C/li>\n\u003C/ul>\n\u003Cp>If the goal is unreachable and partial paths are allowed, the search returns the best reached node by heuristic distance to the goal.\u003C/p>\n\u003Ch3>Corridor and funnel\u003C/h3>\n\u003Cp>The raw result preserves:\u003C/p>\n\u003Cul>\n\u003Cli>polygon corridor\u003C/li>\n\u003Cli>portal list\u003C/li>\n\u003C/ul>\n\u003Cp>Then \u003Ccode>NavmeshPathSmoothing::Funnel\u003C/code> string-pulls the corridor in the nav basis plane and lifts the result back onto the surface using the corridor polygons.\u003C/p>\n\u003Cp>\u003Ccode>NavmeshPathSmoothing::None\u003C/code> does not collapse the route to a straight line. It emits a conservative raw corridor polyline through portal midpoints so path-following can still respect blocked space without using funnel smoothing.\u003C/p>\n\u003Ch2>Follower Pipeline\u003C/h2>\n\u003Cp>Followers are intentionally separate from path queries.\u003C/p>\n\u003Cdiv class=\"code-block\" data-code=\"NavmeshAgent + NavmeshFollowTarget (+ optional NavmeshCrowdAvoidance)\n    -> request refresh decision\n    -> NavmeshPathRequest\n    -> NavmeshPathResult\n    -> waypoint advancement\n    -> local crowd deflection\n    -> NavmeshSteeringOutput\" data-language=\"text\">\n\t\t\t\t\t\u003Cdiv class=\"shiki-theme-light\">\u003Cpre class=\"shiki github-light\" style=\"background-color:#fff;color:#24292e\" tabindex=\"0\">\u003Ccode>\u003Cspan class=\"line\">\u003Cspan>NavmeshAgent + NavmeshFollowTarget (+ optional NavmeshCrowdAvoidance)\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> request refresh decision\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> NavmeshPathRequest\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> NavmeshPathResult\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> waypoint advancement\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> local crowd deflection\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> NavmeshSteeringOutput\u003C/span>\u003C/span>\u003C/code>\u003C/pre>\u003C/div>\n\t\t\t\t\t\u003Cdiv class=\"shiki-theme-dark\">\u003Cpre class=\"shiki github-dark\" style=\"background-color:#24292e;color:#e1e4e8\" tabindex=\"0\">\u003Ccode>\u003Cspan class=\"line\">\u003Cspan>NavmeshAgent + NavmeshFollowTarget (+ optional NavmeshCrowdAvoidance)\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> request refresh decision\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> NavmeshPathRequest\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> NavmeshPathResult\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> waypoint advancement\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> local crowd deflection\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> NavmeshSteeringOutput\u003C/span>\u003C/span>\u003C/code>\u003C/pre>\u003C/div>\n\t\t\t\t\u003C/div>\u003Cp>The follower:\u003C/p>\n\u003Cul>\n\u003Cli>repaths on interval\u003C/li>\n\u003Cli>repaths when the target changes enough\u003C/li>\n\u003Cli>marks paths stale when the surface generation changes\u003C/li>\n\u003Cli>advances waypoints using arrival and overshoot tolerances\u003C/li>\n\u003Cli>optionally samples nearby followers and deflects the desired velocity away from predicted short-horizon collisions\u003C/li>\n\u003C/ul>\n\u003Cp>The follower does not mutate transforms. It only emits movement intent.\u003C/p>\n\u003Cp>\u003Ccode>NavmeshPath.total_length\u003C/code> reports the produced follow polyline length. \u003Ccode>NavmeshPath.total_cost\u003C/code> keeps the weighted search estimate so area costs and off-mesh-link multipliers stay visible to diagnostics and higher-level AI.\u003C/p>\n\u003Ch3>Crowd deflection stage\u003C/h3>\n\u003Cp>If an agent carries \u003Ccode>NavmeshCrowdAvoidance\u003C/code>, the follow stage gathers nearby follower snapshots from the same frame and applies a lightweight reciprocal-style adjustment:\u003C/p>\n\u003Cul>\n\u003Cli>relative position and velocity predict short-horizon overlap\u003C/li>\n\u003Cli>braking reduces forward pressure into imminent conflicts\u003C/li>\n\u003Cli>side bias adds a stable lateral escape direction\u003C/li>\n\u003C/ul>\n\u003Cp>This stage is intentionally local and cheap. It improves medium-density follow scenes without turning the crate into a full crowd-simulation backend.\u003C/p>\n\u003Ch2>Async Flow\u003C/h2>\n\u003Cdiv class=\"code-block\" data-code=\"dirty source / explicit rebuild request\n    -> mark surface dirty\n    -> wait for debounce deadline\n    -> spawn async bake task\n    -> poll task in ECS\n    -> update surface component + status + diagnostics\" data-language=\"text\">\n\t\t\t\t\t\u003Cdiv class=\"shiki-theme-light\">\u003Cpre class=\"shiki github-light\" style=\"background-color:#fff;color:#24292e\" tabindex=\"0\">\u003Ccode>\u003Cspan class=\"line\">\u003Cspan>dirty source / explicit rebuild request\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> mark surface dirty\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> wait for debounce deadline\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> spawn async bake task\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> poll task in ECS\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> update surface component + status + diagnostics\u003C/span>\u003C/span>\u003C/code>\u003C/pre>\u003C/div>\n\t\t\t\t\t\u003Cdiv class=\"shiki-theme-dark\">\u003Cpre class=\"shiki github-dark\" style=\"background-color:#24292e;color:#e1e4e8\" tabindex=\"0\">\u003Ccode>\u003Cspan class=\"line\">\u003Cspan>dirty source / explicit rebuild request\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> mark surface dirty\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> wait for debounce deadline\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> spawn async bake task\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> poll task in ECS\u003C/span>\u003C/span>\n\u003Cspan class=\"line\">\u003Cspan>    -> update surface component + status + diagnostics\u003C/span>\u003C/span>\u003C/code>\u003C/pre>\u003C/div>\n\t\t\t\t\u003C/div>\u003Cp>Bake tasks return a crate-owned output object. ECS applies that output on the main world once the task is ready.\u003C/p>\n\u003Ch2>System Ordering\u003C/h2>\n\u003Cp>\u003Ccode>NavmeshSystems\u003C/code> are ordered as:\u003C/p>\n\u003Col>\n\u003Cli>\u003Ccode>DetectChanges\u003C/code>\u003C/li>\n\u003Cli>\u003Ccode>Bake\u003C/code>\u003C/li>\n\u003Cli>\u003Ccode>Query\u003C/code>\u003C/li>\n\u003Cli>\u003Ccode>Follow\u003C/code>\u003C/li>\n\u003Cli>\u003Ccode>Debug\u003C/code>\u003C/li>\n\u003C/ol>\n\u003Cp>That yields these guarantees:\u003C/p>\n\u003Cul>\n\u003Cli>requests see the latest completed surface\u003C/li>\n\u003Cli>followers read query results from the same frame\u003C/li>\n\u003Cli>debug reflects the final state for the frame\u003C/li>\n\u003C/ul>\n\u003Ch2>Debug Derivation\u003C/h2>\n\u003Cp>Debug drawing reads live ECS data only:\u003C/p>\n\u003Cul>\n\u003Cli>\u003Ccode>NavmeshSurfaceData\u003C/code> for triangles, portals, and links\u003C/li>\n\u003Cli>\u003Ccode>NavmeshPathResult\u003C/code> for active paths\u003C/li>\n\u003Cli>\u003Ccode>NavmeshPathRequest\u003C/code> for projected start and goal\u003C/li>\n\u003Cli>\u003Ccode>NavmeshSteeringOutput\u003C/code> for follower state\u003C/li>\n\u003C/ul>\n\u003Cp>No shadow debug cache is maintained. \u003Ccode>NavmeshDebugSettings::surface_depth_bias\u003C/code> is forwarded into Bevy&#39;s default gizmo config group so crate users can lift the wireframe in front of scene geometry when inspecting dense levels.\u003C/p>\n\u003Ch2>Invalidations\u003C/h2>\n\u003Cp>When a surface becomes dirty or its generation changes:\u003C/p>\n\u003Cul>\n\u003Cli>existing results are marked pending or stale\u003C/li>\n\u003Cli>\u003Ccode>NavmeshPathInvalidated\u003C/code> is published\u003C/li>\n\u003Cli>followers request a refresh on their next update\u003C/li>\n\u003C/ul>\n\u003Cp>This keeps query consumers aware of topology churn without forcing the crate to own locomotion rollback or reconciliation.\u003C/p>\n",title:"`saddle-ai-navmesh` Architecture",description:"`saddle-ai-navmesh` Architecture documentation",rawMarkdown:"## Runtime Model\n\nThe crate is split into five layers:\n\n1. Geometry ingestion\n2. Bake pipeline\n3. Query pipeline\n4. Follower pipeline\n5. Debug and diagnostics\n\nStateful orchestration lives in ECS. Geometry, corridor, and search logic live in plain Rust.\n\n## Surface Ownership\n\nEach navmesh instance is represented by one entity:\n\n- `NavmeshSurface`\n- `NavmeshBakeSettings`\n- `NavmeshSurfaceStatus`\n- `NavmeshSurfaceData` once a bake succeeds\n\nSource entities point at a surface entity through `NavmeshSource.surface`.\n\nThis keeps multiple independent navmeshes cheap to reason about:\n\n- one dungeon floor can bake separately from another\n- different scenes can keep their own settings\n- a crate-local lab can expose multiple surfaces without global singleton state\n\n## Bake Pipeline\n\n```\nsource entities / pure build input\n    -> collect triangles and link inputs\n    -> project to nav basis\n    -> classify walkable triangles by slope\n    -> build obstacle footprints\n    -> cull blocked triangles\n    -> extract adjacency portals\n    -> attach off-mesh links\n    -> publish NavmeshSurfaceData\n```\n\n### Source collection\n\nThe ECS collector supports:\n\n- `Mesh3d` sources\n- `NavmeshPrimitiveSource`\n- explicit pure `NavmeshBuildInput` via `bake_navmesh`\n\nEvery collected source is normalized into crate-owned triangle soup plus metadata:\n\n- source id\n- source kind\n- area id\n- traversal mask\n- transformed world vertices\n\n### Walkability filtering\n\nTriangles are rejected when:\n\n- their normal is degenerate\n- their slope exceeds `max_slope_degrees`\n- their centroid falls inside an obstacle footprint or within the configured agent radius of it\n\n### Portal extraction\n\nThe bake keeps triangles instead of merging them into larger polygons. That keeps v0.1 simpler while still giving clean corridor extraction:\n\n- shared edges become portals\n- portals are stored explicitly for queries and debug drawing\n- adjacency is filtered by `max_step_height`\n\n### Runtime rebuild policy\n\nDirty regions are accumulated per surface, but the actual rebuild policy is:\n\n- debounce source changes for `rebuild_debounce_seconds`\n- rebuild the full surface asynchronously\n- publish the new surface only when the task completes\n\nThis keeps the runtime predictable and correct while leaving space for future tiled backends.\n\n## Query Pipeline\n\n```\nworld-space start/goal\n    -> nearest-point projection\n    -> polygon graph search\n    -> corridor reconstruction\n    -> optional funnel smoothing\n    -> NavmeshPathQueryResult\n```\n\n### Projection\n\nProjection is triangle-based:\n\n- every triangle is considered for nearest point\n- filters reject disallowed area masks\n- the result includes the winning polygon index and projected point\n\nIf the query settings require on-mesh endpoints, projection failure becomes a terminal status. Otherwise the query can auto-project.\n\n### Graph search\n\nThe search graph includes:\n\n- triangle-to-triangle portals\n- off-mesh links\n\nTraversal cost is:\n\n- Euclidean step cost\n- multiplied by area-cost overrides from `NavmeshQueryFilter`\n- multiplied by link cost for off-mesh links\n\nIf the goal is unreachable and partial paths are allowed, the search returns the best reached node by heuristic distance to the goal.\n\n### Corridor and funnel\n\nThe raw result preserves:\n\n- polygon corridor\n- portal list\n\nThen `NavmeshPathSmoothing::Funnel` string-pulls the corridor in the nav basis plane and lifts the result back onto the surface using the corridor polygons.\n\n`NavmeshPathSmoothing::None` does not collapse the route to a straight line. It emits a conservative raw corridor polyline through portal midpoints so path-following can still respect blocked space without using funnel smoothing.\n\n## Follower Pipeline\n\nFollowers are intentionally separate from path queries.\n\n```\nNavmeshAgent + NavmeshFollowTarget (+ optional NavmeshCrowdAvoidance)\n    -> request refresh decision\n    -> NavmeshPathRequest\n    -> NavmeshPathResult\n    -> waypoint advancement\n    -> local crowd deflection\n    -> NavmeshSteeringOutput\n```\n\nThe follower:\n\n- repaths on interval\n- repaths when the target changes enough\n- marks paths stale when the surface generation changes\n- advances waypoints using arrival and overshoot tolerances\n- optionally samples nearby followers and deflects the desired velocity away from predicted short-horizon collisions\n\nThe follower does not mutate transforms. It only emits movement intent.\n\n`NavmeshPath.total_length` reports the produced follow polyline length. `NavmeshPath.total_cost` keeps the weighted search estimate so area costs and off-mesh-link multipliers stay visible to diagnostics and higher-level AI.\n\n### Crowd deflection stage\n\nIf an agent carries `NavmeshCrowdAvoidance`, the follow stage gathers nearby follower snapshots from the same frame and applies a lightweight reciprocal-style adjustment:\n\n- relative position and velocity predict short-horizon overlap\n- braking reduces forward pressure into imminent conflicts\n- side bias adds a stable lateral escape direction\n\nThis stage is intentionally local and cheap. It improves medium-density follow scenes without turning the crate into a full crowd-simulation backend.\n\n## Async Flow\n\n```\ndirty source / explicit rebuild request\n    -> mark surface dirty\n    -> wait for debounce deadline\n    -> spawn async bake task\n    -> poll task in ECS\n    -> update surface component + status + diagnostics\n```\n\nBake tasks return a crate-owned output object. ECS applies that output on the main world once the task is ready.\n\n## System Ordering\n\n`NavmeshSystems` are ordered as:\n\n1. `DetectChanges`\n2. `Bake`\n3. `Query`\n4. `Follow`\n5. `Debug`\n\nThat yields these guarantees:\n\n- requests see the latest completed surface\n- followers read query results from the same frame\n- debug reflects the final state for the frame\n\n## Debug Derivation\n\nDebug drawing reads live ECS data only:\n\n- `NavmeshSurfaceData` for triangles, portals, and links\n- `NavmeshPathResult` for active paths\n- `NavmeshPathRequest` for projected start and goal\n- `NavmeshSteeringOutput` for follower state\n\nNo shadow debug cache is maintained. `NavmeshDebugSettings::surface_depth_bias` is forwarded into Bevy's default gizmo config group so crate users can lift the wireframe in front of scene geometry when inspecting dense levels.\n\n## Invalidations\n\nWhen a surface becomes dirty or its generation changes:\n\n- existing results are marked pending or stale\n- `NavmeshPathInvalidated` is published\n- followers request a refresh on their next update\n\nThis keeps query consumers aware of topology churn without forcing the crate to own locomotion rollback or reconciliation.\n",slug:"architecture"},uses:{params:["slug"]}}],
+							form: null,
+							error: null
+						});
+					});
+				}
+			</script>
+		</div>
+	</body>
+</html>
